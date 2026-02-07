@@ -1,6 +1,6 @@
 // Dữ liệu người dùng mẫu
 const users = {
-    'nhatnam-0888363955@tio.com': { password: 'Nhatnam1511@', name: 'Nguyễn Nhật Nam', sbd: '283923', birthday: '15/11/2015', class: 'Phóng viên', work:'Hôm nay bạn không có nhiệm vụ nào cả!', status:'Đã hoàn thành'}
+    'nhatnam-0888363955@tio.com': { password: 'Nhatnam1511@', name: 'Nguyễn Nhật Nam', sbd: '283923', birthday: '15/11/2015', class: 'Phóng viên', work:'Hôm nay bạn không có nhiệm vụ nào cả!', status:'Đã hoàn thành'},
 };
 
 // Hàm xóa sạch mọi dữ liệu người dùng khỏi localStorage
@@ -79,7 +79,7 @@ function updateDashboardUI() {
 checkLoginState();
 
 // 2. Gắn sự kiện cho form đăng nhập (chỉ chạy nếu đang ở trang index.html)
-if (window.location.pathname.endsWith('/login.html')) {
+if (window.location.pathname.endsWith('/index.html')) {
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
