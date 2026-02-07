@@ -1,7 +1,6 @@
 // Dữ liệu người dùng mẫu
 const users = {
-    'nhatnam-0888363955@tio.com': { password: 'Nhatnam1511@', name: 'Nguyễn Nhật Nam', sbd: 'TIO-1659', birthday: '15/11/2015', class: '5', school:'TH Nguyễn Văn Tố', room: 'Phòng thi số 39' },
-    'maianhtien': { password: 'maianhtien', name: 'Mai Anh Tiến', sbd: 'No data', birthday: 'No data', class: 'No data', school:'No data', room: 'No data', birthday: 'No data'},
+    'nhatnam-0888363955@tio.com': { password: 'Nhatnam1511@', name: 'Nguyễn Nhật Nam', sbd: '283923', birthday: '15/11/2015', class: 'Phóng viên',}
 };
 
 // Hàm xóa sạch mọi dữ liệu người dùng khỏi localStorage
@@ -30,7 +29,7 @@ function login(username, password) {
             
         }));
         // Chuyển hướng đến dashboard
-        window.location.href = 'dashboard.html';
+        window.location.href = 'cong-viec-duoc-giao.html';
         return true;
     }
     return false;
