@@ -79,7 +79,7 @@ function updateDashboardUI() {
 checkLoginState();
 
 // 2. Gắn sự kiện cho form đăng nhập (chỉ chạy nếu đang ở trang index.html)
-if (window.location.pathname.endsWith('/index.html')) {
+if (window.location.pathname.endsWith('/login.html')) {
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
