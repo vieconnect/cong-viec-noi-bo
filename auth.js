@@ -25,7 +25,7 @@ function login(username, password) {
             birthday: user.birthday,
             class: user.class,
             work: user.work,
-            status: user.statua,
+            status: user.status,
             
         }));
         // Chuyển hướng đến dashboard
