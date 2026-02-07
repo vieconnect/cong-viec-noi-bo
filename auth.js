@@ -1,6 +1,6 @@
 // Dữ liệu người dùng mẫu
 const users = {
-    'nhatnam-0888363955@tio.com': { password: 'Nhatnam1511@', name: 'Nguyễn Nhật Nam', sbd: '283923', birthday: '15/11/2015', class: 'Phóng viên', work:'Hôm nay bạn không có nhiệm vụ nào cả!', status:'Đã hoàn thành'},
+    'nhatnam-0888363955@tio.com': { password: 'Nhatnam1511@', name: 'Nguyễn Nhật Nam', sbd: '238659', birthday: '15/11/2015', class: 'Biên tập viên', work:'Hôm nay bạn không có việc gì cần hoàn thành!', status:'Đã hoàn thành',}, 
 };
 
 // Hàm xóa sạch mọi dữ liệu người dùng khỏi localStorage
@@ -25,7 +25,7 @@ function login(username, password) {
             birthday: user.birthday,
             class: user.class,
             work: user.work,
-            status: user.status,
+            status: user.statua,
             
         }));
         // Chuyển hướng đến dashboard
