@@ -12,33 +12,40 @@ const users = {
     },
 };
 
-// 2. Các hàm xử lý cốt lõi
+// 2. Đối tượng điều khiển Logic
 const AuthApp = {
-    // Lưu thông tin vào LocalStorage
+    // Hàm đăng nhập
     login: function(username, password) {
         const user = users[username];
         if (user && user.password === password) {
-            localStorage.setItem('currentUser', JSON.stringify({ 
+            localStorage.setItem('currentUser', JSON.stringify({                 
                 username: username, 
             name: user.name, 
             sbd: user.sbd,
             birthday: user.birthday,
             class: user.class,
             school: user.school,
-            room: user.room, 
-            }));
+            room: user.room,  }));
             return true;
         }
         return false;
     },
 
-    // Xóa thông tin và đăng xuất
+    // Hàm đăng xuất - NGĂN CHẶN QUAY LẠI TRANG TRƯỚC
     logout: function() {
+        // Xóa dữ liệu phiên làm việc
         localStorage.removeItem('currentUser');
-        window.location.replace('index.html'); // Dùng replace để không thể bấm "Back" quay lại
+        
+        // Thay thế lịch sử trình duyệt bằng trang login để không thể "Back"
+        window.location.replace('index.html');
+
+        // Thêm một bước chặn phụ: Đẩy một trạng thái ảo vào lịch sử
+        setTimeout(() => {
+            window.history.pushState(null, null, 'index.html');
+        }, 0);
     },
 
-    // Kiểm tra quyền truy cập (Chặn người dùng chưa đăng nhập)
+    // Kiểm tra trạng thái đăng nhập
     checkAuth: function() {
         const user = localStorage.getItem('currentUser');
         const isLoginPage = window.location.pathname.includes('index.html') || window.location.pathname.endsWith('/');
@@ -46,27 +53,12 @@ const AuthApp = {
         if (!user && !isLoginPage) {
             window.location.replace('index.html');
         }
-    },
-
-    // Cập nhật giao diện nếu có dữ liệu
-    initUI: function() {
-        const user = JSON.parse(localStorage.getItem('currentUser'));
-        if (user) {
-            const welcomeMsg = document.getElementById('welcomeMessage');
-            if (welcomeMsg) welcomeMsg.textContent = `Xin chào, ${user.name}!`;
-            
-            // Có thể đổ thêm dữ liệu công việc vào đây nếu cần
-            const workTask = document.getElementById('workTask');
-            if (workTask) workTask.textContent = user.work;
-        }
     }
 };
 
-// 3. Lắng nghe sự kiện khi trang đã sẵn sàng
+// 3. Khởi tạo khi trang tải xong
 document.addEventListener('DOMContentLoaded', () => {
-    // Kiểm tra bảo mật ngay lập tức
     AuthApp.checkAuth();
-    AuthApp.initUI();
 
     // Xử lý Form Đăng nhập
     const loginForm = document.getElementById('authLoginForm');
@@ -78,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const errorDiv = document.getElementById('errorMessage');
 
             if (AuthApp.login(userVal, passVal)) {
-                window.location.href = 'cong-viec-duoc-giao.html';
+                // Khi đăng nhập thành công, dùng replace để trang login biến mất khỏi lịch sử
+                window.location.replace('cong-viec-duoc-giao.html');
             } else {
                 errorDiv.textContent = 'Sai tài khoản hoặc mật khẩu!';
                 errorDiv.style.display = 'block';
@@ -86,17 +79,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Xử lý Nút Đăng xuất bằng ID "logoutButton"
+    // Xử lý Nút Đăng xuất ID "logoutButton"
     const logoutBtn = document.getElementById('logoutButton');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (confirm('Bạn có chắc muốn đăng xuất không?')) {
-                AuthApp.logout();
-            }
+            AuthApp.logout();
         });
     }
 });
+
+// 4. Chống quay lại bằng nút Back của trình duyệt (Browser Back Button)
+// Nếu người dùng đã đăng xuất mà cố bấm Back, trang sẽ tự load lại và checkAuth sẽ đuổi họ ra
+window.addEventListener('pageshow', function (event) {
+    if (event.persisted || (typeof window.performance != "undefined" && window.performance.navigation.type === 2)) {
+        window.location.reload();
+    }
+});
+
 // // Dữ liệu người dùng mẫu
 // const users = {
 //     'casphez9323': { password: 'Casphez1511@', name: 'Casphez Iboje Maskeniye', sbd: '238659', birthday: '15/11/2015', class: 'Biên tập viên', work:'Tự soạn một bài thuyết trình về bản tin các quốc gia sau đó quay video gửi qua email Giám đốc', status:'Chưa hoàn thành', expiredate:'8h00 tối, ngày 10/2/2026'}, 
