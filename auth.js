@@ -19,13 +19,16 @@ const AuthApp = {
         const user = users[username];
         if (user && user.password === password) {
             localStorage.setItem('currentUser', JSON.stringify({                 
-                username: username, 
+               username: username, 
             name: user.name, 
             sbd: user.sbd,
             birthday: user.birthday,
             class: user.class,
             school: user.school,
-            room: user.room,  }));
+            work: user.work,
+            status: user.status,
+            expiredate: user.expiredate,
+            }));
             return true;
         }
         return false;
