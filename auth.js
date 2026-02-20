@@ -103,23 +103,6 @@ function updateDashboardUI() {
 // 1. Kiểm tra trạng thái đăng nhập ngay lập tức
 checkLoginState();
 
-// 2. Gắn sự kiện cho form đăng nhập (chỉ chạy nếu đang ở trang index.html)
-if (window.location.pathname.endsWith('/login.html')) {
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
-
-            if (!login(username, password)) {
-                errorMessage.textContent = 'Sai tên đăng nhập hoặc mật khẩu.';
-                errorMessage.style.display = 'block';
-            }
-        });
-    });
-}
-
 // Cấu hình các hằng số
 const MAX_ATTEMPTS = 5;
 const LOCKOUT_TIME_MS = 30000; // 30 giây
@@ -158,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const updateMessage = () => {
             alertPlaceholder.innerHTML = `
-                <div class="alert alert-danger text-center fw-bold" role="alert">
+                <div class="alert alert-warning text-center fw-bold" role="alert">
                     Nhập sai quá nhiều lần, khóa trong <span id="countdown">${timeLeft}</span> giây
                 </div>`;
         };
