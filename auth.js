@@ -65,7 +65,7 @@ function login(username, password) {
 function logout() {
     clearUserData();
     // Chuyển hướng về trang đăng nhập
-    window.location.href = 'login.html';
+    window.location.href = 'index.html';
     // Ngăn người dùng quay lại trang trước
     setTimeout(() => {
         window.history.replaceState(null, '', 'login.html');
@@ -76,8 +76,8 @@ function checkLoginState() {
     const currentUser = localStorage.getItem('currentUser');
     const currentPage = window.location.pathname.split('/').pop(); 
     
-    if (!currentUser && currentPage !== 'login.html') {
-        window.location.href = 'login.html';
+    if (!currentUser && currentPage !== 'index.html') {
+        window.location.href = 'index.html';
     }
 }
 
@@ -104,7 +104,7 @@ function updateDashboardUI() {
 checkLoginState();
 
 // 2. Gắn sự kiện cho form đăng nhập (chỉ chạy nếu đang ở trang index.html)
-if (window.location.pathname.endsWith('/login.html')) {
+if (window.location.pathname.endsWith('/')) {
     document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
