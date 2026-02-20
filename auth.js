@@ -48,7 +48,7 @@ function login(username, password) {
     }
 
     localStorage.setItem('currentUser', JSON.stringify({ 
-       username: username, 
+        username: username, 
             name: user.name, 
             sbd: user.sbd,
             birthday: user.birthday,
@@ -57,6 +57,7 @@ function login(username, password) {
             work: user.work,
             status: user.status,
             expiredate: user.expiredate,
+        
      }));
     return { success: true };
 }
@@ -121,12 +122,39 @@ if (window.location.pathname.endsWith('/login.html')) {
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
+    const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+    // Hàm tạo Alert động
+    const showAlert = (message, type) => {
+        // Xóa Alert cũ nếu đang hiển thị để tránh chồng chất
+        alertPlaceholder.innerHTML = '';
+
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type} alert-dismissible fade show" role="alert" id="activeAlert">`,
+            `   <div>${message}</div>`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>'
+        ].join('');
+
+        alertPlaceholder.append(wrapper);
+
+        // Lấy phần tử alert vừa tạo
+        const alertInstance = document.getElementById('activeAlert');
+
+        // SỰ KIỆN: Khi Alert bị đóng hoàn toàn
+        alertInstance.addEventListener('closed.bs.alert', () => {
+            const usernameInput = document.getElementById('username');
+            // Đưa focus về ô nhập tên đăng nhập để người dùng nhập lại ngay
+            usernameInput.focus();
+        });
+    };
+
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
 
             const result = login(username, password);
 
@@ -134,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.location.href = 'dashboard.html';
             } else {
                 if (result.reason === 'LOCKED') {
-                    // Đổ dữ liệu vào Modal trước khi hiển thị
+                    // Hiển thị Modal nếu tài khoản bị khóa
                     document.getElementById('displayLockID').textContent = result.lockDetails.id;
                     document.getElementById('displayLockReason').textContent = result.lockDetails.reason;
                     document.getElementById('displayLockStart').textContent = result.lockDetails.startTime;
@@ -142,11 +170,136 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     const lockModal = new bootstrap.Modal(document.getElementById('lockAccountModal'));
                     lockModal.show();
-                    if (errorMessage) errorMessage.style.display = 'none';
+                    alertPlaceholder.innerHTML = ''; // Xóa alert nếu có
                 } else {
-                    if (errorMessage) {
-                        errorMessage.textContent = 'Sai tên đăng nhập hoặc mật khẩu.';
-                        errorMessage.style.display = 'block';
+                    // Hiển thị Alert nếu sai mật khẩu/tên đăng nhập
+                    showAlert('Sai tên đăng nhập hoặc mật khẩu. Vui lòng kiểm tra lại!', 'danger');
+                }
+            }
+        });
+    }
+});;
+
+
+// Cấu hình các hằng số
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_TIME_MS = 30000; // 30 giây
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    const alertPlaceholder = document.getElementById('alertPlaceholder');
+    const usernameInput = document.getElementById('username');
+
+    // --- CÁC HÀM TIỆN ÍCH ---
+
+    const showAlert = (message, type) => {
+        alertPlaceholder.innerHTML = '';
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type} alert-dismissible fade show" role="alert" id="activeAlert">`,
+            `   <div>${message}</div>`,
+            '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+            '</div>'
+        ].join('');
+        alertPlaceholder.append(wrapper);
+
+        const alertInstance = document.getElementById('activeAlert');
+        alertInstance.addEventListener('closed.bs.alert', () => {
+            if (!localStorage.getItem('lockoutEnd')) usernameInput.focus();
+        });
+    };
+
+    // Hàm thực thi việc khóa giao diện
+    const executeLockout = (remainingTimeMs) => {
+        // Ẩn các thành phần đăng nhập
+        const formElements = loginForm.querySelectorAll('.mb-3, button, .text');
+        formElements.forEach(el => el.style.visibility = 'hidden');
+
+        let timeLeft = Math.ceil(remainingTimeMs / 1000);
+
+        const updateMessage = () => {
+            alertPlaceholder.innerHTML = `
+                <div class="alert alert-warning text-center fw-bold" role="alert">
+                    Nhập sai quá nhiều lần, khóa trong <span id="countdown">${timeLeft}</span> giây
+                </div>`;
+        };
+
+        updateMessage();
+
+        const timer = setInterval(() => {
+            timeLeft--;
+            const countdownEl = document.getElementById('countdown');
+            if (countdownEl) countdownEl.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                // Mở khóa
+                localStorage.removeItem('lockoutEnd');
+                localStorage.setItem('failedAttempts', '0');
+                formElements.forEach(el => el.style.visibility = 'visible');
+                alertPlaceholder.innerHTML = '';
+                showAlert('Bạn đã có thể thử lại.', 'success');
+            }
+        }, 1000);
+    };
+
+    // --- KIỂM TRA TRẠNG THÁI KHI LOAD TRANG ---
+
+    const checkCurrentLockout = () => {
+        const lockoutEnd = localStorage.getItem('lockoutEnd');
+        if (lockoutEnd) {
+            const remaining = parseInt(lockoutEnd) - Date.now();
+            if (remaining > 0) {
+                executeLockout(remaining);
+            } else {
+                // Đã hết thời gian khóa khi đang offline
+                localStorage.removeItem('lockoutEnd');
+                localStorage.setItem('failedAttempts', '0');
+            }
+        }
+    };
+
+    checkCurrentLockout();
+
+    // --- XỬ LÝ SỰ KIỆN SUBMIT ---
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Nếu đang bị khóa (vừa nhấn submit vừa có lockout trong localStorage)
+            if (localStorage.getItem('lockoutEnd')) return;
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const result = login(username, password);
+
+            if (result.success) {
+                localStorage.setItem('failedAttempts', '0');
+                window.location.href = 'dashboard.html';
+            } else {
+                if (result.reason === 'LOCKED') {
+                    // Xử lý Modal tài khoản bị khóa vĩnh viễn
+                    document.getElementById('displayLockID').textContent = result.lockDetails.id;
+                    document.getElementById('displayLockReason').textContent = result.lockDetails.reason;
+                    document.getElementById('displayLockStart').textContent = result.lockDetails.startTime;
+                    document.getElementById('displayLockDuration').textContent = result.lockDetails.duration;
+
+                    const lockModal = new bootstrap.Modal(document.getElementById('lockAccountModal'));
+                    lockModal.show();
+                    alertPlaceholder.innerHTML = '';
+                } else {
+                    // Sai mật khẩu: Tăng số lần thử trong localStorage
+                    let attempts = parseInt(localStorage.getItem('failedAttempts') || '0');
+                    attempts++;
+                    localStorage.setItem('failedAttempts', attempts.toString());
+
+                    if (attempts >= MAX_ATTEMPTS) {
+                        const unlockTime = Date.now() + LOCKOUT_TIME_MS;
+                        localStorage.setItem('lockoutEnd', unlockTime.toString());
+                        executeLockout(LOCKOUT_TIME_MS);
+                    } else {
+                        showAlert(`Sai thông tin. Bạn còn ${MAX_ATTEMPTS - attempts} lần thử trước khi bị tạm khóa.`, 'danger');
                     }
                 }
             }
