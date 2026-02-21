@@ -1,5 +1,5 @@
 const users = {
- 'casphez9323': { 
+    'casphez9323': { 
         password: 'Casphez1511@', 
         name: 'Casphez Iboje Maskeniye', 
         sbd: '238659', 
@@ -8,28 +8,32 @@ const users = {
         work: 'Tự soạn một bài thuyết trình về bản tin các quốc gia sau đó quay video gửi qua email Giám đốc', 
         status: 'Chưa hoàn thành', 
         expiredate: '8h00 tối, ngày 10/2/2026',
-         isLocked: false,
+        isLocked: false,
         // Thông tin chi tiết về việc khóa
         lockInfo: {
-            id: "LOCK-2025-001",
-            reason: "Vi phạm điều khoản sử dụng của VieConnect",
+            id: "238659",
+            reason: "Thường xuyên không hoàn thành công việc",
             startTime: "11:20 20/02/2026",
-            duration: "Vĩnh viễn"
+            duration: "90 ngày"
+        },
     },
-},
     'nhattiento2704@gmail.com': {
         password: '123456',
         name: 'Nguyễn Nhật Nam',
         isLocked: true,
         // Thông tin chi tiết về việc khóa
         lockInfo: {
-            id: "LOCK-2025-001",
-            reason: "Vi phạm điều khoản sử dụng của VieConnect",
+           id: "293049",
+            reason: "Thường xuyên không hoàn thành công việc",
             startTime: "11:20 20/02/2026",
-            duration: "Vĩnh viễn"
+            duration: "90 ngày"
         }
     }
 };
+
+// --- CODE THÊM MỚI: CẤU HÌNH KHÓA ---
+const MAX_ATTEMPTS = 5;
+const LOCK_DURATION = 30; // 30 giây
 
 function clearUserData() {
     localStorage.removeItem('currentUser');
@@ -50,15 +54,15 @@ function login(username, password) {
 
     localStorage.setItem('currentUser', JSON.stringify({ 
         username: username, 
-            name: user.name, 
-            sbd: user.sbd,
-            birthday: user.birthday,
-            class: user.class,
-            school: user.school,
-            work: user.work,
-            status: user.status,
-            expiredate: user.expiredate,
-     }));
+        name: user.name, 
+        sbd: user.sbd,
+        birthday: user.birthday,
+        class: user.class,
+        school: user.school,
+        work: user.work,
+        status: user.status,
+        expiredate: user.expiredate,
+    }));
     return { success: true };
 }
 
@@ -68,7 +72,7 @@ function logout() {
     window.location.href = 'index.html';
     // Ngăn người dùng quay lại trang trước
     setTimeout(() => {
-        window.history.replaceState(null, '', 'login.html');
+        window.history.replaceState(null, '', 'index.html');
     }, 0);
 }
 
@@ -76,7 +80,7 @@ function checkLoginState() {
     const currentUser = localStorage.getItem('currentUser');
     const currentPage = window.location.pathname.split('/').pop(); 
     
-    if (!currentUser && currentPage !== 'index.html') {
+    if (!currentUser && currentPage !== 'index.html' && currentPage !== '') {
         window.location.href = 'index.html';
     }
 }
@@ -98,37 +102,57 @@ function updateDashboardUI() {
     }
 }
 
+// --- CODE THÊM MỚI: HÀM KIỂM TRA TRẠNG THÁI KHÓA TẠM THỜI ---
+function checkLockStatus() {
+    const lockUntil = localStorage.getItem('lockUntil');
+    const loginInputs = document.getElementById('loginInputs');
+    const alertPlaceholder = document.getElementById('alertPlaceholder');
+
+    if (lockUntil) {
+        const currentTime = new Date().getTime();
+        const timeLeft = parseInt(lockUntil) - currentTime;
+
+        if (timeLeft > 0) {
+            if (loginInputs) loginInputs.style.display = 'none';
+            const secondsLeft = Math.ceil(timeLeft / 1000);
+            
+            // Thông báo căn giữa, không có nút X
+            alertPlaceholder.innerHTML = `
+                <div class="alert alert-warning d-flex justify-content-center align-items-center text-center fw-bold" role="alert" style="min-height: 50px;">
+                    Bạn đã nhập sai quá nhiều lần. Thử lại sau ${secondsLeft} giây
+                </div>`;
+            
+            setTimeout(checkLockStatus, 1000);
+            return true;
+        } else {
+            localStorage.removeItem('lockUntil');
+            localStorage.setItem('loginAttempts', '0');
+            if (loginInputs) loginInputs.style.display = 'block';
+            alertPlaceholder.innerHTML = '';
+            return false;
+        }
+    }
+    return false;
+}
+
 // --- Logic chạy khi script auth.js được tải ---
 
 // 1. Kiểm tra trạng thái đăng nhập ngay lập tức
 checkLoginState();
 
-// 2. Gắn sự kiện cho form đăng nhập (chỉ chạy nếu đang ở trang index.html)
-if (window.location.pathname.endsWith('/')) {
-    document.addEventListener('DOMContentLoaded', () => {
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const errorMessage = document.getElementById('errorMessage');
+// 2. Kiểm tra trạng thái khóa ngay lập tức
+document.addEventListener('DOMContentLoaded', () => {
+    checkLockStatus();
+});
 
-            if (!login(username, password)) {
-                errorMessage.textContent = 'Sai tên đăng nhập hoặc mật khẩu.';
-                errorMessage.style.display = 'block';
-            }
-        });
-    });
-}
-
+// 2. Gắn sự kiện cho form đăng nhập
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
     const alertPlaceholder = document.getElementById('alertPlaceholder');
 
-    // Hàm tạo Alert động
+    // Hàm tạo Alert động (Giữ nguyên của bạn)
     const showAlert = (message, type) => {
-        // Xóa Alert cũ nếu đang hiển thị để tránh chồng chất
         alertPlaceholder.innerHTML = '';
-
         const wrapper = document.createElement('div');
         wrapper.innerHTML = [
             `<div class="alert alert-${type} alert-dismissible fade show" role="alert" id="activeAlert">`,
@@ -136,54 +160,83 @@ document.addEventListener('DOMContentLoaded', () => {
             '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
             '</div>'
         ].join('');
-
         alertPlaceholder.append(wrapper);
-
-        // Lấy phần tử alert vừa tạo
         const alertInstance = document.getElementById('activeAlert');
-
-        // SỰ KIỆN: Khi Alert bị đóng hoàn toàn
         alertInstance.addEventListener('closed.bs.alert', () => {
             const usernameInput = document.getElementById('username');
-            // Đưa focus về ô nhập tên đăng nhập để người dùng nhập lại ngay
-            usernameInput.focus();
+            if(usernameInput) usernameInput.focus();
         });
     };
 
-if (loginForm) {
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // 1. Hiện hiệu ứng loading
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        loadingOverlay.style.display = 'flex';
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Nếu đang bị khóa thì không cho xử lý tiếp
+            if (checkLockStatus()) return;
 
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
+            // 1. Hiện hiệu ứng loading
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
 
-        // 2. Giả lập thời gian chờ loading (1.5 giây)
-        setTimeout(() => {
-            const result = login(username, password);
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
 
-            if (result.success) {
-                window.location.href = 'cong-viec-duoc-giao.html';
-            } else {
-                // Tắt loading nếu đăng nhập thất bại để hiện lỗi
-                loadingOverlay.style.display = 'none';
+            // 2. Giả lập thời gian chờ loading (1.5 giây)
+            setTimeout(() => {
+                const result = login(username, password);
 
-                if (result.reason === 'LOCKED') {
-                    document.getElementById('displayLockID').textContent = result.lockDetails.id;
-                    document.getElementById('displayLockReason').textContent = result.lockDetails.reason;
-                    document.getElementById('displayLockStart').textContent = result.lockDetails.startTime;
-                    document.getElementById('displayLockDuration').textContent = result.lockDetails.duration;
-
-                    const lockModal = new bootstrap.Modal(document.getElementById('lockAccountModal'));
-                    lockModal.show();
-                    alertPlaceholder.innerHTML = ''; 
+                if (result.success) {
+                    localStorage.setItem('loginAttempts', '0'); // Reset nếu đúng
+                    window.location.href = 'cong-viec-duoc-giao.html';
                 } else {
-                    showAlert('Sai tên đăng nhập hoặc mật khẩu. Vui lòng kiểm tra lại!', 'danger');
+                    loadingOverlay.style.display = 'none';
+
+                    if (result.reason === 'LOCKED') {
+                        document.getElementById('displayLockID').textContent = result.lockDetails.id;
+                        document.getElementById('displayLockReason').textContent = result.lockDetails.reason;
+                        document.getElementById('displayLockStart').textContent = result.lockDetails.startTime;
+                        document.getElementById('displayLockDuration').textContent = result.lockDetails.duration;
+
+                        const lockModal = new bootstrap.Modal(document.getElementById('lockAccountModal'));
+                        lockModal.show();
+                        alertPlaceholder.innerHTML = ''; 
+                    } else {
+                        // --- CODE THÊM MỚI: XỬ LÝ ĐẾM SỐ LẦN SAI ---
+                        let attempts = parseInt(localStorage.getItem('loginAttempts') || '0');
+                        attempts++;
+                        localStorage.setItem('loginAttempts', attempts);
+
+                        if (attempts >= MAX_ATTEMPTS) {
+                            const lockTime = new Date().getTime() + (LOCK_DURATION * 1000);
+                            localStorage.setItem('lockUntil', lockTime);
+                            checkLockStatus();
+                        } else {
+                            showAlert(`Sai tên đăng nhập hoặc mật khẩu. Bạn còn ${MAX_ATTEMPTS - attempts} lần thử!`, 'danger');
+                        }
+                    }
                 }
-            }
-        }, 1500); // Thời gian chờ 1500ms = 1.5 giây
-    });
-}})
+            }, 1500); 
+        });
+    }
+});
+
+// Chống chuột phải và phím tắt (Giữ nguyên của bạn)
+window.onload = function() {
+    document.addEventListener("contextmenu", function(e) {
+        e.preventDefault();
+    }, false);
+    document.addEventListener("keydown", function(e) {
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 73) disabledEvent(e);
+        if (e.ctrlKey && e.shiftKey && e.keyCode == 74) disabledEvent(e);
+        if (e.keyCode == 83 && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) disabledEvent(e);
+        if (e.ctrlKey && e.keyCode == 85) disabledEvent(e);
+        if (e.keyCode == 123) disabledEvent(e);
+    }, false);
+    function disabledEvent(e) {
+        if (e.stopPropagation) e.stopPropagation();
+        else if (window.event) window.event.cancelBubble = true;
+        e.preventDefault();
+        return false;
+    }
+};
