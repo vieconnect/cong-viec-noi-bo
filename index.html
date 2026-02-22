@@ -184,16 +184,24 @@ button:hover {
   <input type="password" class="form-control" placeholder="Mật khẩu" aria-label="Username" aria-describedby="basic-addon1" id="password" required>
 </div>
                             </div>
-                            <div class="container-login100-form-btn">
-						    <div class="wrap-login100-form-btn">
+                    <div class="container-login100-form-btn">
+						<div class="wrap-login100-form-btn">
 							<div class="login100-form-bgbtn"></div>
 							<button class="login100-form-btn" type="submit">
 								Đăng nhập
 							</button>
+				</div>
+                    </div>
+                        </div>
+					<div class="container-login100-form-btn">
+						<div class="wrap-login100-form-btn">
+							<div class="login100-form-bgbtn"></div>
+							<button class="login100-form-btn" onclick="openLoginWindow()">
+								Đăng nhập
+							</button>
 						</div>
-                        </div>
-                        </div>
-							<button onclick="openLoginWindow()">Đăng nhập bằng MiniQuiz Login</button>
+                    </div>
+                 </div>
         <script>
         function openLoginWindow() {
             // Mở cửa sổ mới cho trang đăng nhập
@@ -208,7 +216,7 @@ button:hover {
                         loginWindow.close();
 
                         // Chuyển hướng sang trang mới mà không thay đổi URL của trang chính
-                        window.location.href = '/cong-viec-duoc-giao';  // Thay bằng trang bạn muốn chuyển hướng
+                        window.location.href = '/cong-viec-duoc-giao.html';  // Thay bằng trang bạn muốn chuyển hướng
                     }
                 }
             });
