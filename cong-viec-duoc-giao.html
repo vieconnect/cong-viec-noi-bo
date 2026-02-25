@@ -72,13 +72,40 @@
         </div>
     </nav>
     <div class="container mt-5">
-        <h1>Công việc được giao</h1>
+        <h1>Kết quả kì thi</h1>
         <hr>
         <div class="card p-4">
-            <p><strong>Họ và tên:</strong> <span id="userNameDisplay"></span></p>
-            <p><strong>Công việc được giao:</strong> <span id="userWorkDisplay"></span></p>
-            <p><strong>Hạn chót hoàn thành:</strong> <span id="userExpireDateDisplay"></span></p>
-          <p><strong>Trạng thái công việc: </strong> <span id="userStatusDisplay"></span></p>
+                   <div class="card p-4">
+            <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">STT</th>
+      <th scope="col">Môn thi</th>
+      <th scope="col">Vòng</th>
+      <th scope="col">Thời gian</th>
+      <th scope="col">Trạng thái</th>
+      <th scope="col">Kết quả kì thi</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row"><span id="stt1"></span></th>
+      <td><span id="subject1"></span></td>
+      <td><span id="round1"></span></td>
+      <td><span id="time1"></span></td>
+      <td><span id="examStatus1"></span></td>
+      <td><span id="result1"></span></td>
+    </tr>
+      <tr>
+      <th scope="row"><span id="stt2"></span></th>
+      <td><span id="subject2"></span></td>
+      <td><span id="round2"></span></td>
+      <td><span id="time2"></span></td>
+      <td><span id="examStatus2"></span></td>
+      <td><span id="result2"></span></td>
+    </tr>
+  </tbody>
+</table>
         </div>
     </div>
     
@@ -91,10 +118,18 @@
         function updateExamRoomUI() {
             const currentUser = JSON.parse(localStorage.getItem('currentUser'));
             if (currentUser) {
-                document.getElementById('userNameDisplay').textContent = currentUser.name;
-                document.getElementById('userWorkDisplay').textContent = currentUser.work;
-              document.getElementById('userStatusDisplay').textContent = currentUser.status;
-                document.getElementById('userExpireDateDisplay').textContent = currentUser.expiredate;
+                document.getElementById('stt1').textContent = currentUser.stt1;
+                document.getElementById('subject1').textContent = currentUser.subject1;
+                document.getElementById('time1').textContent = currentUser.time1;
+                document.getElementById('round1').textContent = currentUser.round1;
+                document.getElementById('examStatus1').textContent = currentUser.examStatus1;
+                document.getElementById('result1').textContent = currentUser.result1;
+                document.getElementById('stt2').textContent = currentUser.stt2;
+                document.getElementById('subject2').textContent = currentUser.subject2;
+                document.getElementById('time2').textContent = currentUser.time2;
+                document.getElementById('round2').textContent = currentUser.round2;
+                document.getElementById('examStatus2').textContent = currentUser.examStatus2;
+                document.getElementById('result2').textContent = currentUser.result2;
                 
                 const welcomeMessageEl = document.getElementById('welcomeMessage');
                 if (welcomeMessageEl) {
